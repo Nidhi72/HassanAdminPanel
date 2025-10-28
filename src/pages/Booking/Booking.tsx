@@ -6,7 +6,7 @@ import "datatables.net";
 import config from "../../config";
 import QRCode from "qrcode";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 import CryptoJS from "crypto-js";
 import { useParams } from "react-router-dom";
 
@@ -34,7 +34,7 @@ interface BookingType {
 const Booking: React.FC = React.memo(() => {
   const { filterType } = useParams<{ filterType?: string }>();
   const notify = (message: string) => toast.error(message);
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const [data, setData] = useState<BookingType[]>([]);
   const [filteredData, setFilteredData] = useState<BookingType[]>([]);
   const [selectedBooking, setSelectedBooking] = useState<BookingType | null>(
@@ -340,7 +340,7 @@ const generateBookingQR = async (bookingDetails: BookingType) => {
     <p className="text-2xl font-bold text-black">
       {filterType ? filterMap[filterType] || "All" : "All"} Bookings
     </p>
-    <button
+    {/* <button
       onClick={() => {
         // Navigate to add booking page or open a modal
         navigate("/add-booking"); 
@@ -348,7 +348,7 @@ const generateBookingQR = async (bookingDetails: BookingType) => {
       className="px-4 py-2 bg-primary text-white rounded hover:bg-primary/80"
     >
       + Add Booking
-    </button>
+    </button> */}
   </div>
       <div className="overflow-x-auto">
         <table ref={tableRef} className="display w-full text-left"></table>
