@@ -6,6 +6,7 @@ import "datatables.net";
 import config from "../../config";
 import QRCode from "qrcode";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 import CryptoJS from "crypto-js";
 import { useParams } from "react-router-dom";
 
@@ -33,7 +34,7 @@ interface BookingType {
 const Booking: React.FC = React.memo(() => {
   const { filterType } = useParams<{ filterType?: string }>();
   const notify = (message: string) => toast.error(message);
-
+  const navigate = useNavigate();
   const [data, setData] = useState<BookingType[]>([]);
   const [filteredData, setFilteredData] = useState<BookingType[]>([]);
   const [selectedBooking, setSelectedBooking] = useState<BookingType | null>(
@@ -145,17 +146,35 @@ const Booking: React.FC = React.memo(() => {
   }, [filterType]);
 
   // 🔹 QR Ticket Generator
-  const generateBookingQR = async (bookingDetails: BookingType) => {
-    try {
-      const canvas = document.createElement("canvas");
-      canvas.width = 500;
-      canvas.height = 750;
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return;
+// 🔹 QR Ticket Generator
+const generateBookingQR = async (bookingDetails: BookingType) => {
+  try {
+    const canvas = document.createElement("canvas");
+    canvas.width = 500;
+    canvas.height = 800;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
 
-      ctx.fillStyle = "#4E1A27";
-      ctx.fillRect(0, 0, 500, 750);
+    // Background
+    ctx.fillStyle = "#4E1A27";
+    ctx.fillRect(0, 0, 500, 800);
 
+    // 🔹 Fixed logo URL (replace with your actual logo link)
+    const logoUrl = "https://srihassanaambatemple.com/assets/logo/logo.png"; 
+
+    const logoImg = new Image();
+    logoImg.crossOrigin = "anonymous";
+    logoImg.onload = async () => {
+      const logoSize = 80;
+      ctx.drawImage(logoImg, (500 - logoSize) / 2, 20, logoSize, logoSize);
+
+      // Heading below logo
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 22px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText("Sri Hasanamba Devi Jatra Mahotsava-2025", 250, 130);
+
+      // White rounded box for QR
       const rectX = 40,
         rectY = 150,
         rectWidth = 420,
@@ -165,31 +184,17 @@ const Booking: React.FC = React.memo(() => {
       ctx.beginPath();
       ctx.moveTo(rectX + rectRadius, rectY);
       ctx.lineTo(rectX + rectWidth - rectRadius, rectY);
-      ctx.quadraticCurveTo(
-        rectX + rectWidth,
-        rectY,
-        rectX + rectWidth,
-        rectY + rectRadius
-      );
+      ctx.quadraticCurveTo(rectX + rectWidth, rectY, rectX + rectWidth, rectY + rectRadius);
       ctx.lineTo(rectX + rectWidth, rectY + rectHeight - rectRadius);
-      ctx.quadraticCurveTo(
-        rectX + rectWidth,
-        rectY + rectHeight,
-        rectX + rectWidth - rectRadius,
-        rectY + rectHeight
-      );
+      ctx.quadraticCurveTo(rectX + rectWidth, rectY + rectHeight, rectX + rectWidth - rectRadius, rectY + rectHeight);
       ctx.lineTo(rectX + rectRadius, rectY + rectHeight);
-      ctx.quadraticCurveTo(
-        rectX,
-        rectY + rectHeight,
-        rectX,
-        rectY + rectHeight - rectRadius
-      );
+      ctx.quadraticCurveTo(rectX, rectY + rectHeight, rectX, rectY + rectHeight - rectRadius);
       ctx.lineTo(rectX, rectY + rectRadius);
       ctx.quadraticCurveTo(rectX, rectY, rectX + rectRadius, rectY);
       ctx.closePath();
       ctx.fill();
 
+      // Generate QR
       const qrData = `${bookingDetails.id}`;
       const qrCodeDataUrl = await QRCode.toDataURL(qrData, {
         width: 400,
@@ -202,28 +207,28 @@ const Booking: React.FC = React.memo(() => {
         const qrSize = 360;
         ctx.drawImage(qrImage, (500 - qrSize) / 2, rectY + 20, qrSize, qrSize);
 
+        // Ticket details
         ctx.font = "bold 20px Arial";
         ctx.fillStyle = "#ffffff";
         ctx.textAlign = "center";
+
         const textStartY = rectY + rectHeight + 40;
         const spacing = 60;
+
         ctx.fillText(`Booking ID: ${bookingDetails.id}`, 250, textStartY);
-        ctx.font = "bold 40px Arial";
-        ctx.fillText(
-          `Rs ${bookingDetails.type || "1000"}/-`,
-          250,
-          textStartY + spacing
-        );
+
+        ctx.font = "bold 30px Arial";
+        ctx.fillText(`Rs ${bookingDetails.type || "1000"} ticket/-`, 250, textStartY + spacing);
+
         const formattedDate = formatDate(
           bookingDetails.bookingDate || bookingDetails.createdAt
         );
         ctx.font = "bold 20px Arial";
-        ctx.fillText(
-          `Booking Date: ${formattedDate}`,
-          250,
-          textStartY + spacing * 2
-        );
+        ctx.fillText(`Booking Date: ${formattedDate}`, 250, textStartY + spacing * 2);
 
+        ctx.fillText(`No. of People: ${bookingDetails.NoOfPeople}`, 250, textStartY + spacing * 3);
+
+        // Download
         canvas.toBlob((blob) => {
           if (!blob) return;
           const link = document.createElement("a");
@@ -236,10 +241,14 @@ const Booking: React.FC = React.memo(() => {
         }, "image/png");
       };
       qrImage.src = qrCodeDataUrl;
-    } catch {
-      notify("Error generating ticket QR");
-    }
-  };
+    };
+    logoImg.src = logoUrl; // 🔹 directly using static URL
+  } catch {
+    notify("Error generating ticket QR");
+  }
+};
+
+
 
   // 🔹 Row Click
   const handleRowClick = (bookingDetails: BookingType) => {
@@ -281,7 +290,9 @@ const Booking: React.FC = React.memo(() => {
             },
           },
           { title: "Type", data: "type", defaultContent: "N/A" },
-          {
+          { title: "Aadhar Card", data: "aadharCard", defaultContent: "N/A" },
+          { title: "Contact Number", data: "contactNumber", defaultContent: "N/A" },
+         {
             title: "Booking Date",
             data: "bookingDate",
             defaultContent: "N/A",
@@ -325,9 +336,20 @@ const Booking: React.FC = React.memo(() => {
 
   return (
     <div className="p-4 max-w-full mx-auto font-noto">
-      <p className="text-2xl font-bold text-black mb-4">
-        {filterType ? filterMap[filterType] || "All" : "All"} Bookings
-      </p>
+    <div className="flex justify-between items-center mb-4">
+    <p className="text-2xl font-bold text-black">
+      {filterType ? filterMap[filterType] || "All" : "All"} Bookings
+    </p>
+    <button
+      onClick={() => {
+        // Navigate to add booking page or open a modal
+        navigate("/add-booking"); 
+      }}
+      className="px-4 py-2 bg-primary text-white rounded hover:bg-primary/80"
+    >
+      + Add Booking
+    </button>
+  </div>
       <div className="overflow-x-auto">
         <table ref={tableRef} className="display w-full text-left"></table>
       </div>

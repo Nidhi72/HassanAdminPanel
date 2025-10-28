@@ -66,9 +66,21 @@ export default function BarChartOne() {
         columnWidth: "39%",
         borderRadius: 5,
         borderRadiusApplication: "end",
+        dataLabels: {
+          position: "top", // place the labels above the bars
+        },
       },
     },
-    dataLabels: { enabled: false },
+    dataLabels: {
+      enabled: true,
+      formatter: (val: number) => val.toString(),
+      offsetY: -18, // move labels slightly above the bar
+      offsetX: 2.5,
+      style: {
+        fontSize: "6px",
+        colors: ["#333"],
+      },
+    },
     stroke: { show: true, width: 4, colors: ["transparent"] },
     xaxis: {
       categories: categories,
@@ -86,6 +98,7 @@ export default function BarChartOne() {
     fill: { opacity: 1 },
     tooltip: { y: { formatter: (val: number) => `${val}` } },
   };
+  
 
   const series = [
     { name: "300 Tickets", data: people300 },

@@ -6,6 +6,7 @@ import AppLayout from "./layout/AppLayout";
 import { ScrollToTop } from "./components/common/ScrollToTop";
 import Home from "./pages/Dashboard/Home";
 import Booking from "./pages/Booking/Booking";
+import AddBookingPage from "./pages/Booking/AddBooking";
 import Media from "./pages/Media/Media";
 import Users from "./pages/Users/Users";
 import AddUser from "./pages/Users/AddUser";
@@ -235,6 +236,7 @@ export default function App(): React.ReactElement {
             <Route path="/booking" element={<Booking />} />
             <Route path="/booking/:filterType" element={<Booking />} />
             <Route path="/booking/donation" element={<DonationBooking />} />
+            <Route path="/add-booking" element={<AddBookingPage />} />
             <Route path="/users" element={<Users />} />
             <Route path="/adduser" element={<AddUser />} />
             <Route path="/edituser/:id" element={<EditUser />} />
